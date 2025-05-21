@@ -20,11 +20,14 @@ public class GameListController {
     @Autowired
     private GameListService gameListService;
 
-//    @GetMapping(value = "/{id}")
-//    public GameDTO findById(@PathVariable Long id) {
-//        GameDTO result = gameListService.findById(id);
-//        return result;
-//    }
+    @Autowired
+    private GameService gameService;
+
+    @GetMapping(value = "/{listId}/games")
+    public List<GameMinDTO> findByList(@PathVariable Long listId) {
+        List<GameMinDTO> result = gameService.findByGameList(listId);
+        return result;
+    }
 
     @GetMapping
     public List<GameListDTO> findAll() {
