@@ -1,34 +1,11 @@
 # Build stage
-FROM eclipse-temurin:21-jdk-alpine as build
-
-WORKDIR /app
-
-# Copy Maven wrapper and pom.xml first (for dependency caching)
-COPY .mvn .mvn
-COPY mvnw mvnw.cmd pom.xml ./
-
-# Give execution permission to mvnw
-RUN chmod +x ./mvnw
-
-# Download dependencies (cached if pom.xml doesn't change)
-RUN ./mvnw dependency:go-offline -B
-
-# Copy source code
-COPY src ./src
-
-# Build the application (simplified command)
-RUN ./mvnw clean package -DskipTests
+FROM eclipse-temurin:21-jdk-jammy AS build
+WORKDIR /workspace/app
+COPY . .
+RUN ./gradlew build
 
 # Runtime stage
-FROM openjdk:21-jre-slim
-
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-
-# Copy the built JAR from build stage
-COPY --from=build /app/target/*.jar app.jar
-
-# Expose port (Railway usa PORT environment variable)
-EXPOSE $PORT
-
-# Run the application
-CMD ["java", "-jar", "app.jar"]
+COPY --from=build /workspace/app/build/libs/your-app.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
